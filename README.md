@@ -181,7 +181,7 @@ py -0    # lists every Python version the launcher can see
 ### Clone the repository
 
 ```powershell
-git clone https://github.com/<your-username>/MLOps-CCA.git
+git clone https://github.com/Shreyas1105/MLOps-CCA.git
 cd MLOps-CCA
 ```
 
