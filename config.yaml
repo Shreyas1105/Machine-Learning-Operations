@@ -1,0 +1,51 @@
+# ============================================================
+# config.yaml
+# ------------------------------------------------------------
+# WHY THIS FILE EXISTS (MLOps concept):
+# In MLOps, we NEVER hard-code parameters like learning rate,
+# epochs, or batch size directly inside the training script.
+# Instead we keep them in a separate configuration file.
+#
+# Benefits:
+#   1. We can change an experiment (e.g. try a new learning
+#      rate) WITHOUT touching the code.
+#   2. It makes experiments reproducible - anyone can look at
+#      this file and know exactly what settings produced a
+#      given MLflow run.
+#   3. It cleanly separates "code" from "configuration",
+#      which is a core MLOps/DevOps best practice.
+# ============================================================
+
+# --- Data settings ---
+data:
+  test_split: 0.2        # 20% of the data reserved for the final, untouched test set
+  val_split: 0.2         # 20% of the remaining training data used for validation
+  random_seed: 42        # fixed seed -> same split every time -> reproducible experiments
+
+# --- Model architecture ---
+model:
+  hidden_layer_1_units: 16   # number of neurons in the first hidden layer
+  hidden_layer_2_units: 8    # number of neurons in the second hidden layer
+  activation: "relu"         # activation function used in hidden layers
+  output_activation: "softmax"  # softmax -> converts outputs into class probabilities
+
+# --- Training hyperparameters ---
+training:
+  learning_rate: 0.01
+  batch_size: 8
+  epochs: 60
+
+# --- MLflow settings ---
+mlflow:
+  experiment_name: "iris_classification_experiment"
+  registered_model_name: "iris_tf_classifier"
+  tracking_uri: "mlruns"     # local folder used to store MLflow tracking data
+
+# --- Paths ---
+paths:
+  model_dir: "model"
+  model_file: "model/iris_model.keras"
+  scaler_file: "model/scaler.pkl"
+  labels_file: "model/label_classes.json"
+  reference_data: "data/reference_data.csv"
+  current_data: "data/current_data.csv"

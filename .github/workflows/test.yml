@@ -1,0 +1,105 @@
+# ================================================================
+# .github/workflows/test.yml
+# ----------------------------------------------------------------
+# WHAT THIS FILE DOES:
+# This is the "CI/CD" stage of the MLOps lifecycle. Every time
+# code is pushed (or a pull request is opened) to this repository,
+# GitHub Actions automatically:
+#   1. Spins up a clean Ubuntu machine.
+#   2. Installs the exact Python version and dependencies used
+#      by this project.
+#   3. Trains the model so that fresh model artifacts exist to
+#      test against.
+#   4. Runs the full pytest test suite.
+#   5. Reports success (green check) or failure (red X) directly
+#      on the GitHub commit/PR.
+#
+# WHY THIS MATTERS IN MLOPS:
+# CI/CD is what prevents broken code (or a broken model) from
+# being merged. It gives everyone on the team - and you, during
+# your viva - concrete, automated proof that the project works,
+# not just "it worked on my machine".
+# ================================================================
+
+name: Test Iris MLOps Pipeline
+
+# Trigger this workflow on every push and every pull request.
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+jobs:
+  test:
+    name: Train Model and Run Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      # ----------------------------------------------------------
+      # Step 1: Check out the repository code
+      # ----------------------------------------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ----------------------------------------------------------
+      # Step 2: Set up the correct Python version
+      # ----------------------------------------------------------
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+          # NOTE: Python 3.10 is used deliberately (both here and on
+          # your local machine - see README) because TensorFlow,
+          # MLflow, and Evidently all have mature, mutually
+          # compatible wheels on this version. Newer Python versions
+          # can hit dependency conflicts between these three
+          # libraries; keeping CI and local development on the same
+          # Python version is itself good MLOps practice, since it
+          # guarantees "works on my machine" also means "works in CI".
+
+      # ----------------------------------------------------------
+      # Step 3: Cache pip dependencies to speed up repeat CI runs
+      # ----------------------------------------------------------
+      - name: Cache pip packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      # ----------------------------------------------------------
+      # Step 4: Install project dependencies
+      # ----------------------------------------------------------
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # ----------------------------------------------------------
+      # Step 5: Train the model so artifacts exist for testing
+      #   (the tests need model/iris_model.keras to exist)
+      # ----------------------------------------------------------
+      - name: Train model
+        run: python src/train.py
+
+      # ----------------------------------------------------------
+      # Step 6: Run the automated test suite
+      # ----------------------------------------------------------
+      - name: Run pytest
+        run: pytest tests/ -v
+
+      # ----------------------------------------------------------
+      # Step 7: Report outcome (GitHub shows this automatically via
+      #   the job's pass/fail status, this step just adds a clear
+      #   human-readable message in the logs)
+      # ----------------------------------------------------------
+      - name: Report result
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ All tests passed. Pipeline is healthy."
+          else
+            echo "❌ Tests failed. Check the logs above for details."
+          fi

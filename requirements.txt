@@ -1,0 +1,46 @@
+# ============================================================
+# requirements.txt
+# ------------------------------------------------------------
+# Pinned dependencies for the Iris MLOps pipeline.
+# Target environment: Python 3.10 (Windows).
+#
+# WHY PYTHON 3.10 (not 3.13):
+# TensorFlow, MLflow, and Evidently all move at different speeds,
+# and their version ranges don't line up cleanly on very new Python
+# releases yet. Python 3.10 is old enough that every package below
+# has mature, well-tested wheels and there is no dependency
+# conflict between any of them. This combination has been used
+# together by many real projects, which is exactly the kind of
+# stability an academic project needs.
+#
+# NOTE FOR STUDENT (viva tip):
+# We pin exact versions so that the project behaves the SAME WAY
+# on every machine (your laptop, your teammate's laptop, and the
+# GitHub Actions CI runner). This is a core MLOps principle:
+# reproducibility of the environment, not just the code.
+# ============================================================
+
+# --- Core ML ---
+tensorflow==2.15.0
+scikit-learn==1.4.2
+pandas==2.2.2
+numpy==1.26.4
+
+# --- Experiment tracking & model registry ---
+mlflow==2.16.0
+
+# --- Model serving ---
+fastapi==0.110.0
+uvicorn[standard]==0.29.0
+pydantic==2.7.1
+
+# --- Monitoring ---
+evidently==0.4.40
+
+# --- Testing ---
+pytest==8.2.0
+httpx==0.27.0
+
+# --- Config / utility ---
+pyyaml==6.0.1
+joblib==1.4.2
